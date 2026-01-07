@@ -6,18 +6,45 @@ public class BaseTest {
 
     protected Playwright playwright;
     protected Browser browser;
+    protected BrowserContext context;
     protected Page page;
 
-    public void launchBrowser() {
+    /**
+     * Launch browser and create page
+     */
+    protected void launchBrowser() {
         playwright = Playwright.create();
+
         browser = playwright.chromium().launch(
-                new BrowserType.LaunchOptions().setHeadless(false)
+                new BrowserType.LaunchOptions()
+                        .setHeadless(false)
+                        .setArgs(java.util.List.of("--start-maximized"))
         );
-        page = browser.newPage();
+
+        // Maximize browser window
+        context = browser.newContext(
+                new Browser.NewContextOptions()
+                        .setViewportSize(null)
+        );
+
+        page = context.newPage();
     }
 
-    public void closeBrowser() {
-        browser.close();
-        playwright.close();
+    /**
+     * Close browser and cleanup resources
+     */
+    protected void closeBrowser() {
+
+        if (context != null) {
+            context.close();
+        }
+
+        if (browser != null) {
+            browser.close();
+        }
+
+        if (playwright != null) {
+            playwright.close();
+        }
     }
 }
